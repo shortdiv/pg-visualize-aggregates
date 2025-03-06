@@ -5,7 +5,7 @@ mod seed;
 use pgrx::prelude::*;
 
 use anyhow::Result;
-use reqwest::{blocking::Client, RequestBuilder};
+use reqwest::blocking::Client;
 use serde_json;
 use std::collections::HashMap;
 
@@ -30,11 +30,7 @@ fn draw_graph() -> Result<String> {
 
     let dat1 = serde_json::to_string(&form).unwrap();
 
-    pgrx::info!("{}", dat1);
-
-    // let dat: String = format!(r#"{{"title": {}, "html": {}}}"#, svg_title, svg_html);
     let form_data = format!("data={}", dat1);
-    // pgrx::info!("{}", svg);
 
     let client = Client::new();
 
@@ -43,8 +39,6 @@ fn draw_graph() -> Result<String> {
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(form_data)
         .send()?;
-
-    // pgrx::info!("{:?}", res.body());
 
     Ok(res.url().to_string())
 }
@@ -61,17 +55,6 @@ mod tests {
             crate::hello_visualizing_aggregates()
         );
     }
-
-    // #[pg_test]
-    // // fn test_insert() {
-    // //     // tbh not sure how to run this in the extension
-    // //     assert!(crate::insert_climb_data().contains("INSERT"));
-    // //     assert!(crate::insert_climb_data().contains("VALUES"));
-    // // }
-    // #[pg_test]
-    // fn test_iterator() {
-    //     assert_eq!(1, crate::to_day("1 Jul 2003 10:52:37 +0200"))
-    // }
 }
 
 /// This module is required by `cargo pgrx test` invocations.
