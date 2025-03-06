@@ -21,8 +21,12 @@ pg17 = ["pgrx/pg17", "pgrx-tests/pg17" ]
 pg_test = []
 
 [dependencies]
+anyhow = "1.0.97"
 chrono = "0.4.40"
 pgrx = "=0.13.1"
+reqwest = { version = "0.12.12", default-features = false, features = ["blocking", "json", "default-tls"] }
+serde = "1.0.218"
+serde_json = "1.0.140"
 
 [dev-dependencies]
 pgrx-tests = "=0.13.1"
