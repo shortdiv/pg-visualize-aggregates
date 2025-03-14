@@ -20,28 +20,33 @@ fn hello_visualizing_aggregates() -> &'static str {
     "Hello, visualizing_aggregates"
 }
 
-pub fn fetch_data(_dataset: String, batch_size: i32) -> Result<pgrx::Json> {
+pub fn fetch_data(_dataset: String, batch_size: i32) -> Result<String> {
     pgrx::info!("logging here");
     let query = format!("SELECT * FROM climbs LIMIT {}", batch_size);
     pgrx::info!("{}", query);
-    Ok(Spi::connect(|client| {
-        let query = r#"SELECT * FROM climbs LIMIT $1"#;
-        pgrx::info!("{}", query);
-        client
-            .select(query, Some(1), &[batch_size.into()])?
-            .get_one::<pgrx::Json>()
-        // let mut cursor = client.open_cursor(&query, &[]);
-        // cursor.fetch(1)?.get_one::<pgrx::Json>()
-    })
-    .unwrap()
-    .unwrap())
+    // Ok(Spi::connect(|client| {
+    let query = r#"SELECT route_name FROM climbs LIMIT $1"#;
+    //     let args = vec![batch_size.into()];
+    pgrx::info!("{}", query);
+    //     client
+    //         .select(query, Some(1), &args)?
+    //         .get_one::<pgrx::Json>()
+    //     // let mut cursor = client.open_cursor(&query, &[]);
+    //     // cursor.fetch(1)?.get_one::<pgrx::Json>()
+    // })
+    // .unwrap()
+    // .unwrap())
+    Ok(Spi::get_one_with_args(query, &[batch_size.into()])
+        .unwrap()
+        .unwrap())
 }
 
 #[pg_extern]
 fn draw_graph(dataset: String) -> Result<String> {
     pgrx::info!("heloo????");
-    let _data = fetch_data(dataset, 1).unwrap();
-    // println!("{:?}", data);
+    let data = fetch_data(dataset, 1).unwrap();
+    pgrx::info!("{:?}", data);
+    pgrx::info!("{}", "hello".to_string());
     let graph = Graph::new("Example".to_string(), 420, "#8ff0a4".into());
     let svg = graph.draw_svg(SVG, 150, 10);
     let mut form = HashMap::new();
