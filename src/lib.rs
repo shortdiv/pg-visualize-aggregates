@@ -13,17 +13,37 @@ use crate::graph::Graph;
 
 ::pgrx::pg_module_magic!();
 
-const SVG: &str = include_str!("templates/svg_template.html");
+const SVG: &str = include_str!("templates/bar_graph_template.html");
 
 #[pg_extern]
 fn hello_visualizing_aggregates() -> &'static str {
     "Hello, visualizing_aggregates"
 }
 
+pub fn fetch_data(_dataset: String, batch_size: i32) -> Result<pgrx::Json> {
+    pgrx::info!("logging here");
+    let query = format!("SELECT * FROM climbs LIMIT {}", batch_size);
+    pgrx::info!("{}", query);
+    Ok(Spi::connect(|client| {
+        let query = r#"SELECT * FROM climbs LIMIT $1"#;
+        pgrx::info!("{}", query);
+        client
+            .select(query, Some(1), &[batch_size.into()])?
+            .get_one::<pgrx::Json>()
+        // let mut cursor = client.open_cursor(&query, &[]);
+        // cursor.fetch(1)?.get_one::<pgrx::Json>()
+    })
+    .unwrap()
+    .unwrap())
+}
+
 #[pg_extern]
-fn draw_graph() -> Result<String> {
-    let graph = Graph::new("Example".to_string(), 40, "#8ff0a4".into());
-    let svg = graph.draw_svg(SVG);
+fn draw_graph(dataset: String) -> Result<String> {
+    pgrx::info!("heloo????");
+    let _data = fetch_data(dataset, 1).unwrap();
+    // println!("{:?}", data);
+    let graph = Graph::new("Example".to_string(), 420, "#8ff0a4".into());
+    let svg = graph.draw_svg(SVG, 150, 10);
     let mut form = HashMap::new();
     form.insert("title", svg.title);
     form.insert("html", svg.html);
